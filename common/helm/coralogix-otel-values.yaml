@@ -1,0 +1,10 @@
+global:
+  domain: eu2.coralogix.com
+  clusterName: "lab-ec2-k3s"
+opentelemetry-agent:
+  config:
+    exporters:
+      coralogix:
+        # Force the app name to be k3s-ec2; no overwriting from attributes
+        application_name_attributes:
+        application_name: k3s-ec2

@@ -1,0 +1,76 @@
+---
+- name: Install K3s on EC2 vm
+  hosts: k3s
+  become: true
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install dependencies
+      apt:
+        name:
+          - curl
+        state: present
+
+    - name: Download and install K3s
+      shell: |
+        curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--write-kubeconfig-mode 644" sh -
+      args:
+        creates: /usr/local/bin/k3s
+
+    - name: Check K3s status
+      command: systemctl status k3s
+      register: k3s_status
+      ignore_errors: true
+
+    - debug:
+        var: k3s_status.stdout_lines
+
+    - name: Wait for kubeconfig to be generated
+      wait_for:
+        path: /etc/rancher/k3s/k3s.yaml
+        timeout: 60
+
+    - name: Fetch kubeconfig to control machine
+      fetch:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: ../kubeconfig.yaml
+        flat: yes
+        mode: 0644
+
+    - name: Replace localhost with public IP
+      delegate_to: localhost
+      become: false
+      run_once: true
+      vars:
+        kubeconfig_path: "../kubeconfig.yaml"
+      block:
+        - name: Read public IP from inventory
+          set_fact:
+            node_ip: "{{ hostvars[inventory_hostname].ansible_host | default(inventory_hostname) }}"
+
+        - name: Replace 127.0.0.1 with node public IP
+          ansible.builtin.replace:
+            path: "{{ kubeconfig_path }}"
+            regexp: "127\\.0\\.0\\.1"
+            replace: "{{ node_ip }}"
+
+        - name: Set insecure-skip-tl-verify
+          ansible.builtin.lineinfile:
+            path: "{{ kubeconfig_path }}"
+            regexp: "insecure-tls-verify: true"
+            insertafter: '^-\s*cluster:$'
+            line: "    insecure-skip-tls-verify: true"
+
+        - name: remove certificate authority data
+          ansible.builtin.lineinfile:
+            path: "{{ kubeconfig_path }}"
+            regexp: '^\s+certificate-authority-data'
+            state: absent
+
+        - name: Move kubeconfig to ~/.kube
+          ansible.builtin.copy:
+            src: "{{ kubeconfig_path }}"
+            dest: "{{ lookup('env', 'HOME') }}/.kube/postgres.yaml"
+            mode: "0600"
