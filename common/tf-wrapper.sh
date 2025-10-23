@@ -44,7 +44,7 @@ echo "> AWS SSH key name: $TF_VAR_aws_ssh_key_name"
 
 export TF_VAR_lab_type="$project"
 
-source ../common/get-default-vpc.sh
+source ../common/scripts/get-default-vpc.sh
 export TF_VAR_vpc_id=$TF_VAR_vpc_id
 export TF_VAR_subnet_ids=$(echo '["'$TF_VAR_subnet_ids'"]' | sed 's/,/","/g')
 echo "> VPC: $TF_VAR_vpc_id; Subnets: $TF_VAR_subnet_ids"
@@ -74,6 +74,8 @@ echo "> cding to tfdir at $tfdir"
 cd $tfdir
 
 echo "> $tf ${verb}ing a thing called '$TF_VAR_thing_name', created by '$TF_VAR_user'"
+
+sleep 3
 
 if [[ "$verb" == "up" ]]; then
   $tf init --upgrade && $tf apply --auto-approve
