@@ -7,4 +7,5 @@
 **/.fuse*
 **/*.git
 **/*.bak
+**/inventory.ini
 postgres/tracey-reloaded
