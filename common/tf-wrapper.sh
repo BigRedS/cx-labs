@@ -32,6 +32,35 @@ if [ ! -z "$USERNAME"]; then
   USER=$USERNAME
 fi
 
+# AMIs come from here: https://wiki.debian.org/Cloud/AmazonEC2Image/Trixie
+if [ -z "$AWS_REGION" ]; then
+  export TF_VAR_region="eu-north-1"
+  export TF_VAR_ec2_ami="ami-0e63a5a9c1c7e5563"
+else
+  export TF_VAR_region=$AWS_REGION
+  case $AWS_REGION in
+    "eu-north-1")
+      export TF_VAR_ec2_ami="ami-0e63a5a9c1c7e5563"
+      ;;
+    "us-east-1")
+      export TF_VAR_ec2_ami="ami-0f9c27b471bdcd702"
+      ;;
+    "us-east-2")
+      export TF_VAR_ec2_ami="ami-050352a65e954abb1"
+      ;;
+    "us-west-1")
+      export TF_VAR_ec2_ami="ami-0157ed312f9c59a91"
+      ;;
+    "us-west-2")
+      export TF_VAR_ec2_ami="ami-081ac37fe26dacc98"
+      ;;
+    *)
+      echo "No AMI for AWS region '$AWS_REGION'"
+      ;;
+  esac
+fi
+echo "> Region: $TF_VAR_region, AMI: $TF_VAR_ec2_ami"
+
 if [ -z "$USER" ]; then
   export TF_VAR_user="$(hostname -f)"
   echo "> Couldn't find a username configured. Using hostname ('$TF_VAR_user') instead"

@@ -21,6 +21,7 @@ And to set some environment vars defining the Coralogix team you want to send da
 * `CX_TEAM_NAME`: the name of the team, this is used for tagging the resources in AWS
 * `CX_DATA_TOKEN`: a send-your-data token for the team
 * `CX_DOMAIN`: the domain for your team, 'eu2.coralogix.com' is the default
+* `AWS_REGION`: the AWS region to bring stuff up in; defaults to `eu-north-1`
 
 Finally, for the EC2-based jobs, you'll also need an ssh key at `~/.ssh/id_rsa` or `~/.ssh/id_ed25519`; feel free to patch ./common/tf-wrapper.sh if yours is elsewhere :D
 
@@ -60,7 +61,7 @@ This will bring up an EKS cluster, by default on 1-3 t3.medium nodes.
 * `make up` - bring up the cluster, install otel-demo and coralogix
 * `make destroy` - destroy the cluster
 * `make cx` - install the CX helm chart
-* `make values` - install the CX helm chart using `./values.yaml` as the values fole
+* `make values` - install the CX helm chart using `./values.yaml` as the values file
 * `make port-forward` - set up a port-forward to reach the otel-demo frontend at http://localhost:8080
 * `make k9s` - open K9s on the cluster
 

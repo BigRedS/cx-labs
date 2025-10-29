@@ -1,7 +1,6 @@
 variable "region" {
   description = "AWS region"
   type        = string
-  default     = "eu-north-1"
 }
 
 variable "user" {
@@ -49,8 +48,6 @@ variable "private_ssh_key_path" {
 variable "ec2_ami" {
   description = "id of AMI for EC2 VM. Should be a linux"
   type = string
-  # amd64 debian trixie
-  default = "ami-0955d1e82085ce3e8"
 }
 
 variable "ec2_username" {
