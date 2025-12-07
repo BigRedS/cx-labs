@@ -22,32 +22,11 @@ else
   mv tracey-reloaded/.git tracey-reloaded/.git.bak
 fi
 
-vol_id=$(cd tf ; $tf output postgres_ebs_volume_id | sed 's/"//g')
+# Modern postgres wants /var/lib/postgresql/data to a subdir of a mountpoint and won't start otherwise
+perl -pi -e 's@/var/lib/postgresql/data@/var/lib/postgresql@' ./tracey-reloaded/tracey-database/postgresql-deployment.yaml 
 
-echo $vol_id
-
-cat <<EOD > ./tracey-reloaded/pv-deployment.yaml
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: postgresql-pv
-spec:
-  capacity:
-    storage: 1Gi
-  accessModes:
-    - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Retain
-  storageClassName: gp2
-  awsElasticBlockStore:
-    volumeID: $vol_id
-    fsType: ext4
-  claimRef:
-    namespace: default
-    name: postgresql-pvc
-EOD
+cp postgresql-pvc.yaml ./tracey-reloaded/tracey-database/postgresql-pvc.yaml
 
 cd tracey-reloaded
-
-kubectl apply -f ./pv-deployment.yaml
 chmod +x run-tracey.sh
 ./run-tracey.sh
