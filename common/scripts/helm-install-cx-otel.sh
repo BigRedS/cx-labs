@@ -13,6 +13,7 @@ echo "+ kubeconfig: $KUBECONFIG"
 
 echo '+ Adding CX helm repo'
 helm repo add coralogix $repo_url
+helm repo update
 
 if kubectl get secret coralogix-keys 2>/dev/null >/dev/null ; then
   echo '+ Secret already exists, preserving it'

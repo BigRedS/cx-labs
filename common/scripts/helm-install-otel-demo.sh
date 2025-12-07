@@ -10,6 +10,7 @@ echo "+ kubeconfig: $KUBECONFIG"
 
 echo '+ Adding otel helm repo'
 helm repo add open-telemetry $repo_url
+helm repo update
 
 if helm status -n otel-demo otel-demo >/dev/null 2>/dev/null; then
   echo '+ Otel-demo already installed and does not support upgrading. Explicitly do'
