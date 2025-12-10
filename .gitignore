@@ -9,3 +9,5 @@
 **/*.bak
 **/inventory.ini
 postgres/tracey-reloaded
+*/*values.yaml
+*/*cm.yaml
