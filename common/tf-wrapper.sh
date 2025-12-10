@@ -73,6 +73,14 @@ echo "> AWS SSH key name: $TF_VAR_aws_ssh_key_name"
 
 export TF_VAR_lab_type="$project"
 
+if [ -z "$EKS_VERSION" ]; then
+  source ../common/scripts/get-default-eks-version.sh
+  export EKS_VERSION=$eks_version
+fi
+
+export TF_VAR_eks_k8s_version=$EKS_VERSION
+echo "> EKS Version: $TF_VAR_eks_k8s_version"
+
 source ../common/scripts/get-default-vpc.sh
 export TF_VAR_vpc_id=$TF_VAR_vpc_id
 export TF_VAR_subnet_ids=$(echo '["'$TF_VAR_subnet_ids'"]' | sed 's/,/","/g')

@@ -67,6 +67,11 @@ This will bring up an EKS cluster, by default on 1-3 t3.medium nodes.
 
 Terraform brings up the cluster using the `eks` module, then helm installs the otel-demo and coralogix charts
 
+The EKS version is by default set to the latest from AWS (queried via awscli), set the
+'EKS_VERSION' environment variable to a specific version if you'd prefer that. If AWS
+release a new version while your cluster is running, a successive `make up` will upgrade
+it without prompting, use `make plan` to check first if this is important to you.
+
 ## postgres
 
 Brings up George Pickers' Tracey Reloaded: https://github.com/georgep1ckers/tracey-reloaded
