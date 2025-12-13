@@ -13,6 +13,12 @@ else
   exit 1
 fi
 
+if [[ "$verb" == "workspaces" ]]; then
+  cd "$tfdir"
+  $tf workspace list
+  exit
+fi
+
 if [ -z "$AWS_ACCESS_KEY_ID" ]; then
   echo "No AWS credentials found, log in to AWS and copy-paste the Access keys"
   exit 1
@@ -107,12 +113,31 @@ echo "> Found SSH keypair: $TF_VAR_public_ssh_key_path and $TF_VAR_private_ssh_k
 #fi
 export TF_VAR_thing_name="cs-tam-${TF_VAR_user}-$project"
 
+if [ ! -z "$CX_TEAM_NAME" ]; then
+  export TF_VAR_name_suffix="-$CX_TEAM_NAME"
+  echo "> Name suffix: $TF_VAR_name_suffix"
+elif [ !-z "$CX_LABS_NAME_SUFFIX" ]; then
+  export TF_VAR_name_suffix="-$CX_LABS_NAME_SUFFIX"
+  echo "> Name suffix: $TF_VAR_name_suffix"
+fi
+
 echo "> cding to tfdir at $tfdir"
 cd $tfdir
 
-echo "> $tf ${verb}ing a thing called '$TF_VAR_thing_name', created by '$TF_VAR_user'"
+echo "> $tf ${verb}ing a thing called '$TF_VAR_thing_name${TF_VAR_name_suffix}', created by '$TF_VAR_user'"
 
 sleep 3
+
+if [[ -z "$CX_LABS_WORKSPACE_NAME" && ! -z "$CX_TEAM_NAME" ]]; then
+  CX_LABS_WORKSPACE_NAME=$CX_TEAM_NAME
+fi
+
+if [ ! -z "$CX_LABS_WORKSPACE_NAME" ]; then
+  echo "> Chosen tf workspace: $CX_LABS_WORKSPACE_NAME"
+  $tf workspace select --or-create "$CX_LABS_WORKSPACE_NAME"
+else
+  $tf workspace select default
+fi
 
 if [[ "$verb" == "up" ]]; then
   $tf init --upgrade && $tf apply --auto-approve
@@ -120,6 +145,11 @@ elif [[ "$verb" == "plan" ]]; then
   $tf init --upgrade && $tf plan
 elif [[ "$verb" == "down" ]]; then
   $tf init --upgrade && $tf destroy -auto-approve
+  if [ ! -z "$CX_LABS_WORKSPACE_NAME" ]; then
+    $tf workspace select default
+    $tf workspace delete "$CX_LABS_WORKSPACE_NAME"
+  fi
+
 else
   echo "Invalid verb '$verb'; should be one of 'up', 'plan' or 'down'"
   exit 1;

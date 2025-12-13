@@ -18,12 +18,16 @@ You'll also need to auth with AWS and paste the tokens into your shell.
 
 And to set some environment vars defining the Coralogix team you want to send data to:
 
-* `CX_TEAM_NAME`: the name of the team, this is used for tagging the resources in AWS
 * `CX_DATA_TOKEN`: a send-your-data token for the team
 * `CX_DOMAIN`: the domain for your team, 'eu2.coralogix.com' is the default
 * `AWS_REGION`: the AWS region to bring stuff up in; defaults to `eu-north-1`
 
-Finally, for the EC2-based jobs, you'll also need an ssh key at `~/.ssh/id_rsa` or `~/.ssh/id_ed25519`; feel free to patch ./common/tf-wrapper.sh if yours is elsewhere :D
+There's also an optional environment variable:
+
+* `CX_TEAM_NAME`: the name of the team, if this is set a terraform workspace is created with the value as its name, it is
+  appened as a suffix onto the names of resources, and added to the default tags of resources.
+
+Finally, for the EC2-based jobs, you'll also need an ssh key at `~/.ssh/id_rsa` or `~/.ssh/id_ed25519`; feel free to patch `./common/tf-wrapper.sh` if yours is elsewhere :D
 
 # How to use
 
@@ -82,6 +86,31 @@ Brings up George Pickers' Tracey Reloaded: https://github.com/georgep1ckers/trac
 * `make cx` - install the CX helm chart on k3s
 * `make postgres` - install tracey-reloaded on k3s
 * `make k9s` - open K9s on the cluster
+
+# Running labs in parallel
+
+If the `CX_TEAM_NAME` or `CX_LABS_WORKSPACE_NAME` environment variable is set, then it will be used to name a tf
+workspace for the purpose, giving you the option of running two instances of the same lab in parallel without the
+plans interfering with each other.
+
+    CX_TEAM_NAME=acmecorp make up
+    CX_TEAM_NAME=megacorp make up
+
+Will bring up one instance of the lab in an 'acmecorp' workspace with (most of) the resources named with a suffix
+of 'acmecorp', and another in the 'megacorp' workspace with that as the suffix. `CX_LABS_WORKSPACE_NAME` won't affect
+resource names and just sets the workspace name.
+
+The expected way of setting these is to use the cx tool:
+
+    cx acmecorp exec make up
+    cx megacorp exec make up
+
+which will also configure the collector to send data to acmecorp's and megacorp's coralogix instances by default.
+
+When a lab is brought down (`make destroy`) the workspace is deleted.
+
+The script `common/list-workspaces.sh` will iterate over each lab and print all the extant workspaces, as a way
+of keeping track of what is running. Run it from the root of the repo.
 
 # Underlying principles
 

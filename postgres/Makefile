@@ -26,3 +26,6 @@ plan:
 
 k9s:
 	k9s --kubeconfig $(KUBECONFIG)
+
+workspaces:
+	../common/tf-wrapper.sh $(TF_DIR) workspaces postgres

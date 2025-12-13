@@ -2,6 +2,11 @@ variable "vpc_id" {
   type = string
 }
 
+variable "name_suffix" {
+  type = string
+  default = "-lab"
+}
+
 variable "subnet_ids" {
   type = list(string)
 }

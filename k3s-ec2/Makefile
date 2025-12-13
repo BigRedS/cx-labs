@@ -20,7 +20,7 @@ otel-demo:
 	../common/scripts/helm-install-otel-demo.sh
 
 destroy:
-	../common/tf-wrapper.sh $(TF_DIR) down
+	../common/tf-wrapper.sh $(TF_DIR) down k3s-ec2
 
 plan:
 	../common/tf-wrapper.sh $(TF_DIR) plan k3s-ec2
@@ -31,3 +31,6 @@ port-forward:
 
 k9s:
 	k9s --kubeconfig $(KUBECONFIG)
+
+workspaces:
+	../common/tf-wrapper.sh $(TF_DIR) workspaces k3s-ec2

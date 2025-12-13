@@ -1,10 +1,10 @@
 resource "aws_key_pair" "bootstrap" {
-  key_name   = var.aws_ssh_key_name
+  key_name   = "${var.aws_ssh_key_name}${var.name_suffix}"
   public_key = file(var.public_ssh_key_path)
 }
 
 resource "aws_security_group" "k3s_vm" {
-  name        = var.thing_name
+  name        = "${var.thing_name}${var.name_suffix}"
   description = "Allow SSH and K3s traffic"
 }
 
@@ -36,6 +36,10 @@ resource "aws_instance" "k3s_vm" {
   key_name               = aws_key_pair.bootstrap.key_name
   vpc_security_group_ids = [aws_security_group.k3s_vm.id]
 
+  tags = {
+    Name = var.thing_name
+  }
+
   root_block_device {
     volume_size = 50
     volume_type = "gp3"
@@ -47,4 +51,3 @@ resource "aws_instance" "k3s_vm" {
     command = "echo '[k3s]\n${self.public_ip} ansible_user=${var.ec2_username} ansible_ssh_private_key_file=${var.private_ssh_key_path}' > ../ansible/inventory.ini"
   }
 }
-

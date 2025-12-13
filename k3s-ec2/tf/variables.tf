@@ -3,6 +3,11 @@ variable "region" {
   type        = string
 }
 
+variable "name_suffix" {
+  type = string
+  default = "-lab"
+}
+
 variable "user" {
   description = "Local username; used for tagging resources"
   type = string
