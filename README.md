@@ -19,7 +19,8 @@ You'll also need to auth with AWS and paste the tokens into your shell.
 And to set some environment vars defining the Coralogix team you want to send data to:
 
 * `CX_DATA_TOKEN`: a send-your-data token for the team
-* `CX_DOMAIN`: the domain for your team, 'eu2.coralogix.com' is the default
+* `CX_DOMAIN`: the domain for your team for host- and helm-based labs (eks, k3s-ec2, postgres), 'eu2.coralogix.com' is the default
+* `CX_REGION`: the CX region for the ECS instrumentation
 * `AWS_REGION`: the AWS region to bring stuff up in; defaults to `eu-north-1`
 
 There's also an optional environment variable:
@@ -27,7 +28,9 @@ There's also an optional environment variable:
 * `CX_TEAM_NAME`: the name of the team, if this is set a terraform workspace is created with the value as its name, it is
   appened as a suffix onto the names of resources, and added to the default tags of resources.
 
-Finally, for the EC2-based jobs, you'll also need an ssh key at `~/.ssh/id_rsa` or `~/.ssh/id_ed25519`; feel free to patch `./common/tf-wrapper.sh` if yours is elsewhere :D
+The `cx` tool will set these automatically for you: `cx avi-lab exec make up` should just do what you expect, assuming you have a data key configured for `avi-lab`.
+
+Finally, for the VM-based labs (k3s-ec2, postgres), you'll also need an ssh key at `~/.ssh/id_rsa` or `~/.ssh/id_ed25519`; feel free to patch `./common/tf-wrapper.sh` if yours is elsewhere.
 
 # How to use
 
@@ -75,6 +78,17 @@ The EKS version is by default set to the latest from AWS (queried via awscli), s
 'EKS_VERSION' environment variable to a specific version if you'd prefer that. If AWS
 release a new version while your cluster is running, a successive `make up` will upgrade
 it without prompting, use `make plan` to check first if this is important to you.
+
+## ecs-ec2
+
+This will bring up an ecs-ec2 cluster running the Coralogix ECS integration and an instance of tiny-telemetry
+to generate nonsense telemetry: https://github.com/BigRedS/tiny-telemetry
+
+* `make up` - create the cluster, install the workloads
+* `make destroy` - delete the cluster
+
+The task definition for tiny-telemetry is in `tf/tiny_telemetry_task.tf`; delete this to not-provision it, and
+replace with your own task def if you've any other workloads you'd like to run instead.
 
 ## postgres
 
